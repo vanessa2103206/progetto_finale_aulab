@@ -5,9 +5,15 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-collapse navbar-nav ms-auto mb-2 mb-lg-0 justify-content-end w-100">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 justify-content-end w-100">
+                <!-- Link Homepage sempre visibile -->
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{{ route('homepage') }}">Home</a>
+                    <a class="nav-link active" href="{{ route('homepage') }}">Home</a>
+                </li>
+                
+                <!-- NUOVO LINK PUBBLICO USER STORY 2 (Sempre visibile a tutti!) -->
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="{{ route('articles.index') }}">Tutti gli Annunci</a>
                 </li>
                 
                 <!-- Mostra questi tasti solo se l'utente è LOGGATO -->

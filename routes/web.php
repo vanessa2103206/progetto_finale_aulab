@@ -2,10 +2,16 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PublicController;
-use App\Http\Controllers\ArticleController; // Importazione del nuovo controller
+use App\Http\Controllers\ArticleController;
 
-// Homepage libera
+// Homepage del sito
 Route::get('/', [PublicController::class, 'homepage'])->name('homepage');
 
-// Rotta modificata secondo le indicazioni del docente Aulab
+// Pagina pubblica per vedere tutti gli annunci
+Route::get('/articoli', [ArticleController::class, 'index'])->name('articles.index');
+
+// ROTTA DI DETTAGLIO MANCANTE USER STORY 2 (Ecco il pezzo che mancava!)
+Route::get('/articolo/dettaglio/{article}', [ArticleController::class, 'show'])->name('articles.show');
+
+// Pagina protetta per inserire un nuovo articolo
 Route::get('/articolo/nuovo', [ArticleController::class, 'create'])->name('articles.create')->middleware('auth');

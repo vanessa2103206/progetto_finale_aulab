@@ -5,21 +5,30 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 justify-content-end w-100">
-                <!-- Link Homepage sempre visibile -->
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 justify-content-end w-100 align-items-center">
                 <li class="nav-item">
                     <a class="nav-link active" href="{{ route('homepage') }}">Home</a>
                 </li>
-                
-                <!-- NUOVO LINK PUBBLICO USER STORY 2 (Sempre visibile a tutti!) -->
                 <li class="nav-item">
                     <a class="nav-link text-white" href="{{ route('articles.index') }}">Tutti gli Annunci</a>
                 </li>
                 
-                <!-- Mostra questi tasti solo se l'utente è LOGGATO -->
                 @auth
+                    <!-- Link Lavora con noi visibile solo agli utenti normali che non sono ancora revisori -->
+                    @if(!Auth::user()->is_revisore)
+                        <li class="nav-item">
+                            <a class="nav-link text-white-50 px-3" href="{{ route('revisore.become_form') }}">Lavora con noi</a>
+                        </li>
+                    @endif
+
+                    @if(Auth::user()->is_revisore)
+                        <li class="nav-item">
+                            <a class="nav-link text-info fw-bold px-3" href="{{ route('revisore.index') }}">Zona Revisore</a>
+                        </li>
+                    @endif
+
                     <li class="nav-item">
-                        <a class="nav-link text-warning fw-bold" href="{{ route('articles.create') }}">Nuovo Annuncio</a>
+                        <a class="nav-link text-warning fw-bold px-3" href="{{ route('articles.create') }}">Nuovo Annuncio</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -36,7 +45,6 @@
                     </li>
                 @endauth
 
-                <!-- Mostra questi tasti solo se l'utente NON è loggato (Ospite) -->
                 @guest
                     <li class="nav-item">
                         <a class="nav-link" href="/login">Accedi</a>

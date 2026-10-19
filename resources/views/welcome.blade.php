@@ -1,4 +1,13 @@
 <x-layout>
+    <!-- Contenitore per i messaggi di successo (Banner Verde richiesto!) -->
+    @if (session()->has('successMessage'))
+        <div class="container mt-3">
+            <div class="alert alert-success text-center shadow-sm fw-bold" role="alert">
+                {{ session('successMessage') }}
+            </div>
+        </div>
+    @endif
+
     <!-- Sezione di Benvenuto -->
     <div class="container-fluid text-center bg-body-tertiary py-5 rounded shadow-sm mb-5">
         <div class="row justify-content-center align-items-center">
@@ -12,7 +21,7 @@
         </div>
     </div>
 
-    <!-- Sezione Vetrina degli Ultimi Annunci (Richiesta dal Professore!) -->
+    <!-- Sezione Vetrina degli Ultimi Annunci -->
     <div class="container">
         <h2 class="text-center fw-bold mb-4">Gli ultimi annunci inseriti</h2>
         <div class="row justify-content-center">

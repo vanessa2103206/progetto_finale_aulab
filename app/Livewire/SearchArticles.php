@@ -7,17 +7,13 @@ use App\Models\Article;
 
 class SearchArticles extends Component
 {
-    // Proprietà pubblica legata al campo di testo
     public $search = '';
 
     public function render()
     {
-        // Se la barra non è vuota, filtra gli articoli per titolo o descrizione
+        // Se la barra non è vuota, usa la vera ricerca Full-Text indicizzata di Scout!
         if ($this->search !== '') {
-            $articles = Article::where('title', 'like', '%' . $this->search . '%')
-                ->orWhere('description', 'like', '%' . $this->search . '%')
-                ->orderBy('created_at', 'desc')
-                ->get();
+            $articles = Article::search($this->search)->get();
         } else {
             // Altrimenti prendi tutti gli articoli normalmente
             $articles = Article::orderBy('created_at', 'desc')->get();

@@ -10,14 +10,13 @@
                     <a class="nav-link active" href="{{ route('homepage') }}">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="{{ route('articles.index') }}">Tutti gli Annunci</a>
+                    <a class="nav-link text-white" href="{{ route('articles.index') }}">{{ __('Tutti gli Annunci') }}</a>
                 </li>
                 
                 @auth
-                    <!-- Link Lavora con noi visibile solo agli utenti normali che non sono ancora revisori -->
                     @if(!Auth::user()->is_revisore)
                         <li class="nav-item">
-                            <a class="nav-link text-white-50 px-3" href="{{ route('revisore.become_form') }}">Lavora con noi</a>
+                            <a class="nav-link text-white-50 px-3" href="{{ route('revisore.become_form') }}">{{ __('Lavora con noi') }}</a>
                         </li>
                     @endif
 
@@ -28,7 +27,7 @@
                     @endif
 
                     <li class="nav-item">
-                        <a class="nav-link text-warning fw-bold px-3" href="{{ route('articles.create') }}">Nuovo Annuncio</a>
+                        <a class="nav-link text-warning fw-bold px-3" href="{{ route('articles.create') }}">{{ __('Nuovo Annuncio') }}</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -39,7 +38,7 @@
                                 <form action="/logout" method="POST" id="logout-form">
                                     @csrf
                                     <button type="submit" class="dropdown-item text-danger">Esci (Logout)</button>
-                                </form>
+                                </form> 
                             </li>
                         </ul>
                     </li>
@@ -53,6 +52,30 @@
                         <a class="nav-link" href="/register">Registrati</a>
                     </li>
                 @endguest
+
+                <!-- SELETTORE DELLE LINGUE CON BADGE GRAFICI INFALLIBILI RICHIESTO DA USER STORY 4 -->
+                <li class="nav-item dropdown ms-3 border-start ps-3">
+                    <a class="nav-link dropdown-toggle text-white d-flex align-items-center gap-2" href="#" id="langDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        🌐 {{ strtoupper(App::getLocale()) }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="langDropdown">
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center justify-content-between gap-3" href="{{ route('set_locale', ['locale' => 'it']) }}">
+                                <span>Italiano</span> <span class="badge bg-danger text-white fw-bold shadow-sm">IT</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center justify-content-between gap-3" href="{{ route('set_locale', ['locale' => 'en']) }}">
+                                <span>English</span> <span class="badge bg-primary text-white fw-bold shadow-sm">EN</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center justify-content-between gap-3" href="{{ route('set_locale', ['locale' => 'es']) }}">
+                                <span>Español</span> <span class="badge bg-warning text-dark fw-bold shadow-sm">ES</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
             </ul>
         </div>
     </div>

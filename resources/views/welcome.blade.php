@@ -1,5 +1,5 @@
 <x-layout>
-    <!-- Contenitore per i messaggi di successo (Banner Verde richiesto!) -->
+    <!-- Contenitore per i messaggi di successo -->
     @if (session()->has('successMessage'))
         <div class="container mt-3">
             <div class="alert alert-success text-center shadow-sm fw-bold" role="alert">
@@ -13,9 +13,9 @@
         <div class="row justify-content-center align-items-center">
             <div class="col-12">
                 <h1 class="display-4 fw-bold">Presto.it</h1>
-                <p class="lead mb-4">Il portale degli annunci d'affari</p>
+                <p class="lead mb-4">{{ __('Il portale degli annunci d\'affari') }}</p>
                 <a href="{{ route('articles.create') }}" class="btn btn-primary btn-lg px-4 gap-3 fw-bold shadow-sm">
-                    Inserisci Annuncio
+                    {{ __('Inserisci Annuncio') }}
                 </a>
             </div>
         </div>
@@ -23,13 +23,12 @@
 
     <!-- Sezione Vetrina degli Ultimi Annunci -->
     <div class="container">
-        <h2 class="text-center fw-bold mb-4">Gli ultimi annunci inseriti</h2>
+        <h2 class="text-center fw-bold mb-4">{{ __('Gli ultimi annunci inseriti') }}</h2>
         <div class="row justify-content-center">
             @forelse($articles as $article)
                 <div class="col-12 col-md-4 mb-4">
                     <div class="card h-100 shadow-sm border-0 overflow-hidden">
                         
-                        <!-- Immagini rimpicciolite e centrate -->
                         @if(Str::contains(strtolower($article->title), 'maglia'))
                             <img src="{{ asset('images/maglia.png') }}" class="card-img-top w-50 mx-auto pt-3" alt="Maglia nera" style="height: 180px; object-fit: contain;">
                         @elseif(Str::contains(strtolower($article->title), 'portatile') || Str::contains(strtolower($article->title), 'pc'))

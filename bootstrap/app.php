@@ -11,9 +11,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Registriamo il nostro middleware personalizzato assegnandogli un nome abbreviato
+        // Registriamo l'alias per il revisore
         $middleware->alias([
-            'isRevisore' => \App\Http\Middleware::class . '\IsRevisore',
+            'isRevisore' => \App\Http\Middleware\IsRevisore::class,
+        ]);
+
+        // ATTIVAZIONE GLOBALE USER STORY 4: Controllo della lingua automatico su ogni pagina
+        $middleware->web(append: [
+            \App\Http\Middleware\SetLocaleMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

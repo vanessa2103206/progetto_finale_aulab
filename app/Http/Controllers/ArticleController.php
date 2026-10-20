@@ -8,27 +8,28 @@ use App\Models\Article;
 class ArticleController extends Controller
 {
     /**
-     * Mostra la pagina con tutti gli annunci pubblicati
+     * Mostra la lista di tutti gli articoli approvati
      */
     public function index()
     {
-        $articles = Article::orderBy('created_at', 'desc')->get();
+        // CORREZIONE PROFESSORE: Filtriamo per mostrare solo gli articoli accettati dal revisore
+        $articles = Article::where('is_accepted', true)->orderBy('created_at', 'desc')->get();
         return view('articles.index', compact('articles'));
     }
 
     /**
-     * Mostra il dettaglio di un singolo annuncio
-     */
-    public function show(Article $article)
-    {
-        return view('articles.show', compact('article'));
-    }
-
-    /**
-     * Mostra la pagina ufficiale per creare un nuovo annuncio
+     * Mostra la pagina di creazione di un nuovo articolo
      */
     public function create()
     {
         return view('articles.create');
+    }
+
+    /**
+     * Mostra il dettaglio di un singolo articolo
+     */
+    public function show(Article $article)
+    {
+        return view('articles.show', compact('article'));
     }
 }

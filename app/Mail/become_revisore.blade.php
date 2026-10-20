@@ -20,8 +20,12 @@
             </tr>
         </table>
         
+        <!-- LINK DI AUTOMAZIONE CORRETTO SECONDO LE RICHIESTE DEL DOCENTE -->
         <p style="margin-top: 30px; text-align: center;">
-            Se desideri approvare questa richiesta, puoi lanciare il comando personalizzato di automazione nel terminale del server di Presto.it usando questa email.
+            <a href="{{ route('revisore.make_with_link', ['user' => $user->id]) }}" 
+               style="background-color: #198754; color: white; padding: 12px 20px; text-decoration: none; font-weight: bold; border-radius: 5px; display: inline-block;">
+                Rendi Revisore questo utente
+            </a>
         </p>
     </div>
 </body>

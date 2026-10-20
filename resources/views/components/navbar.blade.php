@@ -5,7 +5,13 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 justify-content-end w-100 align-items-center">
+            
+            <!-- BARRA DI RICERCA GLOBALE LIVEWIRE RICHIESTA DAL PROFESSORE -->
+            <div class="mx-auto my-2 my-lg-0" style="width: 40%; max-width: 500px;">
+                @livewire('search-articles')
+            </div>
+
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
                 <li class="nav-item">
                     <a class="nav-link active" href="{{ route('homepage') }}">Home</a>
                 </li>
@@ -53,7 +59,7 @@
                     </li>
                 @endguest
 
-                <!-- SELETTORE DELLE LINGUE CON BADGE GRAFICI INFALLIBILI RICHIESTO DA USER STORY 4 -->
+                <!-- SELETTORE DELLE LINGUE -->
                 <li class="nav-item dropdown ms-3 border-start ps-3">
                     <a class="nav-link dropdown-toggle text-white d-flex align-items-center gap-2" href="#" id="langDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         🌐 {{ strtoupper(App::getLocale()) }}

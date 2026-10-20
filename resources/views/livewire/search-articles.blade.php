@@ -1,51 +1,49 @@
-<div>
-    <!-- Barra di Ricerca di Bootstrap -->
-    <div class="row justify-content-center mb-5">
-        <div class="col-12 col-md-6">
-            <div class="input-group shadow-sm">
-                <span class="input-group-text bg-success text-white px-3 d-flex align-items-center rounded-start">🔍</span>
-                <input type="text" class="form-control form-control-lg border-start-0" placeholder="Cosa stai cercando? Es. maglia, pc..." wire:model.live="search">
-            </div>
-        </div>
+<div class="position-relative w-100">
+    <!-- Input di ricerca della barra -->
+    <div class="input-group">
+        <span class="input-group-text bg-success text-white border-0" id="basic-addon1">🔍</span>
+        <input type="search" 
+               wire:model.live="search" 
+               class="form-control border-0 bg-light py-2 shadow-none" 
+               placeholder="Cosa stai cercando?" 
+               aria-label="Search">
     </div>
 
-    <!-- Griglia degli Annunci Filtrati -->
-    <div class="row justify-content-center">
-        @forelse($articles as $article)
-            <div class="col-12 col-md-4 mb-4">
-                <div class="card h-100 shadow-sm border-0 overflow-hidden">
-                    
-                    <!-- Immagini dinamiche locali -->
-                    @if(Str::contains(strtolower($article->title), 'maglia'))
-                        <img src="{{ asset('images/maglia.png') }}" class="card-img-top w-50 mx-auto pt-3" alt="Maglia nera" style="height: 180px; object-fit: contain;">
-                    @elseif(Str::contains(strtolower($article->title), 'portatile') || Str::contains(strtolower($article->title), 'pc'))
-                        <img src="{{ asset('images/portatile.png') }}" class="card-img-top w-50 mx-auto pt-3" alt="Computer Portatile" style="height: 180px; object-fit: contain;">
-                    @else
-                        <div class="bg-secondary text-white text-center py-5 fw-bold" style="height: 180px; line-height: 100px;">Nessuna Immagine</div>
-                    @endif
-                    
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title fw-bold text-dark mb-1">{{ $article->title }}</h5>
-                        <span class="badge bg-success align-self-start mb-3">{{ $article->category->name }}</span>
+    <!-- Menu a tendina fluttuante dei risultati (Compare solo se l'utente digita qualcosa!) -->
+    @if($search !== '')
+        <div class="position-absolute bg-white rounded shadow-lg mt-2 w-100 overflow-auto z-3" style="max-height: 400px; border: 1px solid #dee2e6; left: 0;">
+            <div class="list-group list-group-flush">
+                @forelse($articles as $article)
+                    <!-- Singolo risultato cliccabile -->
+                    <a href="{{ route('articles.show', compact('article')) }}" class="list-group-item list-group-item-action d-flex align-items-center p-3 text-decoration-none">
                         
-                        <p class="card-text text-muted text-truncate flex-grow-1">{{ $article->description }}</p>
-                        
-                        <hr class="text-black-50">
-                        
-                        <div class="d-flex justify-content-between align-items-center mt-auto">
-                            <span class="fs-4 fw-bold text-success">{{ number_format($article->price, 2, ',', '.') }} €</span>
-                            <a href="{{ route('articles.show', compact('article')) }}" class="btn btn-primary btn-sm shadow-sm fw-bold">Visualizza</a>
+                        <!-- Mini anteprima immagine rimpicciolita -->
+                        <div class="me-3" style="width: 50px; height: 50px;">
+                            @if(Str::contains(strtolower($article->title), 'maglia'))
+                                <img src="{{ asset('images/maglia.png') }}" class="img-fluid rounded" alt="Maglia" style="width: 100%; height: 100%; object-fit: contain;">
+                            @elseif(Str::contains(strtolower($article->title), 'portatile') || Str::contains(strtolower($article->title), 'pc'))
+                                <img src="{{ asset('images/portatile.png') }}" class="img-fluid rounded" alt="Computer" style="width: 100%; height: 100%; object-fit: contain;">
+                            @else
+                                <div class="bg-secondary rounded text-white text-center" style="line-height: 50px; font-size: 10px;">No Img</div>
+                            @endif
                         </div>
+
+                        <!-- Testi e prezzo del prodotto trovato -->
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0 fw-bold text-dark">{{ $article->title }}</h6>
+                            <small class="text-muted">{{ $article->category->name }}</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-success fs-6">{{ number_format($article->price, 2, ',', '.') }} €</span>
+                        </div>
+                    </a>
+                @empty
+                    <!-- Nessun risultato trovato -->
+                    <div class="p-4 text-center text-muted">
+                        <p class="mb-0">❌ Nessun articolo corrisponde alla tua ricerca.</p>
                     </div>
-                </div>
+                @endforelse
             </div>
-        @empty
-            <div class="col-12 text-center py-5">
-                <div class="alert alert-warning shadow-sm" role="alert">
-                    <h4 class="alert-heading fw-bold">Nessun risultato trovato!</h4>
-                    <p class="mb-0">Non ci sono annunci che corrispondono alla tua ricerca. Prova con un'altra parola!</p>
-                </div>
-            </div>
-        @endforelse
-    </div>
+        </div>
+    @endif
 </div>

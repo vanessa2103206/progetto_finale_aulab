@@ -10,13 +10,15 @@
                 <div class="col-12 col-md-4 mb-4">
                     <div class="card h-100 shadow-sm border-0 overflow-hidden">
                         
-                        @if(Str::contains(strtolower($article->title), 'maglia'))
-                            <img src="{{ asset('images/maglia.png') }}" class="card-img-top w-50 mx-auto pt-3" alt="Maglia" style="height: 180px; object-fit: contain;">
-                        @elseif(Str::contains(strtolower($article->title), 'portatile') || Str::contains(strtolower($article->title), 'pc'))
-                            <img src="{{ asset('images/portatile.png') }}" class="card-img-top w-50 mx-auto pt-3" alt="Computer" style="height: 180px; object-fit: contain;">
-                        @else
-                            <div class="bg-secondary text-white text-center py-5 fw-bold" style="height: 180px; line-height: 100px;">Nessuna Immagine</div>
-                        @endif
+                        <!-- CODICE AGGIORNATO PER IMMAGINE REALE (USER STORY 5 & 6) -->
+                        <div class="text-center bg-light" style="height: 200px;">
+                            @if($article->images->count())
+                                <!-- Prende la prima immagine caricata per l'articolo -->
+                                <img src="{{ Storage::url($article->images->first()->path) }}" class="card-img-top h-100 w-100" style="object-fit: cover;">
+                            @else
+                                <div class="bg-secondary text-white text-center py-5 fw-bold h-100" style="line-height: 100px;">Nessuna Immagine</div>
+                            @endif
+                        </div>
                         
                         <div class="card-body d-flex flex-column">
                             <h5 class="card-title fw-bold text-dark mb-1">{{ $article->title }}</h5>
@@ -32,7 +34,7 @@
                 </div>
             @empty
                 <div class="col-12 text-center py-5">
-                    <p class="text-muted lead">Non ci sono annunci corrispondenti alla ricerca o approvati.</p>
+                    <p class="text-muted lead">Non ci sono annunci pubblicati o approvati.</p>
                 </div>
             @endforelse
         </div>

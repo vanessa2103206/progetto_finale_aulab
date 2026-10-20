@@ -5,12 +5,13 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\Article;
 use App\Models\Category;
-use Livewire\WithFileUploads; // Abilita il caricamento dei file!
+use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
+use App\Jobs\ResizeImage;
 
 class CreateArticleForm extends Component
 {
-    use WithFileUploads; // Attiviamo il modulo dei file multimediali
+    use WithFileUploads;
 
     // Proprietà del form
     public $title;
@@ -18,7 +19,7 @@ class CreateArticleForm extends Component
     public $price;
     public $category_id;
 
-    // Proprietà per la gestione delle immagini (User Story 5)
+    // Proprietà per la gestione delle immagini
     public $images = [];
     public $temporary_images = [];
 
@@ -28,11 +29,11 @@ class CreateArticleForm extends Component
         'description' => 'required|min:10',
         'price' => 'required|numeric',
         'category_id' => 'required',
-        'temporary_images.*' => 'image|max:2048', // Ogni file deve essere un'immagine max 2MB
+        'temporary_images.*' => 'image|max:2048',
     ];
 
     /**
-     * Ascolta in tempo reale quando l'utente seleziona i file dal computer (In blocco!)
+     * Ascolta in tempo reale il caricamento delle immagini in blocco
      */
     public function updatedTemporaryImages()
     {
@@ -44,25 +45,24 @@ class CreateArticleForm extends Component
     }
 
     /**
-     * CRITERIO RICHIESTO: Rimuove una singola immagine dall'anteprima prima di salvare
+     * Rimuove una singola immagine dall'anteprima prima del salvataggio
      */
     public function removeImage($key)
     {
         if (array_key_exists($key, $this->images)) {
             unset($this->images[$key]);
         }
-        // Resettiamo le chiavi dell'array per evitare buchi negli indici
         $this->images = array_values($this->images);
     }
 
     /**
-     * Salva l'annuncio e le sue immagini associate nel Database e nello Storage
+     * Salva l'articolo e attiva il Job di ridimensionamento asincrono
      */
     public function store()
     {
         $this->validate();
 
-        // 1. Creiamo l'articolo (nasce in sospeso, is_accepted = null come vuole il prof!)
+        // 1. Creiamo l'articolo in sospeso
         $article = Article::create([
             'title' => $this->title,
             'description' => $this->description,
@@ -72,14 +72,14 @@ class CreateArticleForm extends Component
             'is_accepted' => null, 
         ]);
 
-        // 2. Se l'utente ha inserito delle immagini, le salviamo fisicamente
+        // 2. Se ci sono immagini caricate, le salviamo e lanciamo il Job a 300x300
         if (count($this->images)) {
             foreach ($this->images as $image) {
-                // Salviamo il file nella cartella privata "articles" dentro lo storage pubblico
                 $path = $image->store('articles', 'public');
-                
-                // Salviamo il percorso nel database collegandolo all'articolo appena nato
-                $article->images()->create(['path' => $path]);
+                $newImage = $article->images()->create(['path' => $path]);
+
+                // DISPATCH DEL JOB: Passiamo l'intero percorso assoluto memorizzato nel database!
+                ResizeImage::dispatch($newImage->path, 300, 300);
             }
         }
 
@@ -89,7 +89,7 @@ class CreateArticleForm extends Component
     }
 
     /**
-     * Svuota i campi del form dopo il salvataggio
+     * Svuota i campi del modulo dopo il salvataggio
      */
     public function cleanForm()
     {

@@ -5,7 +5,7 @@
     </div>
 
     <div class="container">
-        <!-- Messaggio di notifica dopo aver cliccato un bottone -->
+        <!-- Messaggio di notifica -->
         @if (session()->has('successMessage'))
             <div class="alert alert-success text-center shadow-sm" role="alert">
                 {{ session('successMessage') }}
@@ -13,15 +13,24 @@
         @endif
 
         @if($article_to_check)
-            <!-- C'è un annuncio da controllare -->
             <div class="card shadow border-0 p-5 bg-white mb-5 rounded">
                 <div class="row align-items-center">
-                    <!-- Immagine dell'annuncio -->
+                    
+                    <!-- CODICE FALLBACK SICURO PER IMMAGINI USER STORY 5 & 6 -->
                     <div class="col-12 col-md-5 text-center mb-4 mb-md-0">
-                        @if(Str::contains(strtolower($article_to_check->title), 'maglia'))
-                            <img src="{{ asset('images/maglia.png') }}" class="img-fluid rounded shadow-sm w-70 mx-auto" alt="Maglia" style="max-height: 300px; object-fit: contain;">
-                        @elseif(Str::contains(strtolower($article_to_check->title), 'portatile') || Str::contains(strtolower($article_to_check->title), 'pc'))
-                            <img src="{{ asset('images/portatile.png') }}" class="img-fluid rounded shadow-sm w-70 mx-auto" alt="Computer" style="max-height: 300px; object-fit: contain;">
+                        @if($article_to_check->images->count())
+                            <div class="row">
+                                @foreach($article_to_check->images as $image)
+                                    <div class="col-12 mb-2">
+                                        <!-- Se il file croppato non esiste sul pc, carichiamo direttamente la foto originale memorizzata! -->
+                                        @if(file_exists(storage_path('app/public/' . dirname($image->path) . '/crop_300x300_' . basename($image->path))))
+                                            <img src="{{ Storage::url(dirname($image->path) . '/crop_300x300_' . basename($image->path)) }}" class="img-fluid rounded shadow-sm" alt="Immagine annuncio" style="max-height: 300px; width: 300px; object-fit: cover;">
+                                        @else
+                                            <img src="{{ Storage::url($image->path) }}" class="img-fluid rounded shadow-sm" alt="Immagine annuncio" style="max-height: 300px; width: 300px; object-fit: cover;">
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
                         @else
                             <div class="bg-secondary text-white text-center py-5 rounded fw-bold" style="height: 250px; line-height: 150px;">Nessuna Immagine</div>
                         @endif
@@ -38,16 +47,14 @@
                             <p class="text-dark bg-light p-3 rounded" style="white-space: pre-line;">{{ $article_to_check->description }}</p>
                         </div>
 
-                        <!-- I DUE BOTTONI UFFICIALI CON LA SINTASSI CORRETTA -->
+                        <!-- I due bottoni -->
                         <div class="d-flex gap-3 mt-4">
-                            <!-- Form per Rifiutare l'annuncio -->
                             <form action="{{ route('revisore.reject_article', ['article' => $article_to_check->id]) }}" method="POST" class="flex-grow-1">
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit" class="btn btn-danger w-100 py-3 fw-bold shadow-sm">❌ Rifiuta Annuncio</button>
                             </form>
 
-                            <!-- Form per Accettare l'annuncio -->
                             <form action="{{ route('revisore.accept_article', ['article' => $article_to_check->id]) }}" method="POST" class="flex-grow-1">
                                 @csrf
                                 @method('PATCH')
@@ -58,7 +65,6 @@
                 </div>
             </div>
         @else
-            <!-- Non ci sono annunci da controllare -->
             <div class="row justify-content-center">
                 <div class="col-12 col-md-8 text-center py-5">
                     <div class="alert alert-info shadow border-0 p-5 rounded" role="alert">

@@ -9,7 +9,13 @@ class ArticleImage extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['path', 'article_id'];
+    // Abilitiamo il riempimento di tutti i campi di Google Vision richiesti dalla guida
+    protected $fillable = ['path', 'article_id', 'labels', 'adult', 'spoof', 'racy', 'medical', 'violence'];
+
+    // Indichiamo a Laravel di trasformare i tag in un comodo array
+    protected $casts = [
+        'labels' => 'array',
+    ];
 
     /**
      * Relazione inversa: L'immagine appartiene a un articolo

@@ -8,6 +8,8 @@ use App\Models\Category;
 use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
 use App\Jobs\ResizeImage;
+use App\Jobs\GoogleVisionSafeSearch;
+use App\Jobs\GoogleVisionLabelImage;
 
 class CreateArticleForm extends Component
 {
@@ -56,7 +58,7 @@ class CreateArticleForm extends Component
     }
 
     /**
-     * Salva l'articolo e attiva il Job di ridimensionamento asincrono
+     * Salva l'articolo e attiva la catena di Job asincroni in background
      */
     public function store()
     {
@@ -72,14 +74,20 @@ class CreateArticleForm extends Component
             'is_accepted' => null, 
         ]);
 
-        // 2. Se ci sono immagini caricate, le salviamo e lanciamo il Job a 300x300
+        // 2. Se ci sono immagini caricate, le salviamo e lanciamo i Job in background
         if (count($this->images)) {
             foreach ($this->images as $image) {
                 $path = $image->store('articles', 'public');
                 $newImage = $article->images()->create(['path' => $path]);
 
-                // DISPATCH DEL JOB: Passiamo l'intero percorso assoluto memorizzato nel database!
+                // A) Ridimensionamento immagine 300x300 (User Story 6)
                 ResizeImage::dispatch($newImage->path, 300, 300);
+
+                // B) Controllo sicurezza immagini SafeSearch (User Story 7)
+                GoogleVisionSafeSearch::dispatch($newImage->id);
+
+                // C) Estrazione etichette di testo LabelImage (User Story 7)
+                GoogleVisionLabelImage::dispatch($newImage->id);
             }
         }
 

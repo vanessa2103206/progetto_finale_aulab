@@ -7,7 +7,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Spatie\Image\Image; // IMPORTAZIONE UFFICIALE DI SPATIE CHIENDA DAL PROF!
+use Spatie\Image\Image;
+use Spatie\Image\Enums\CropPosition; 
+use Spatie\Image\Enums\Unit;         
 
 class ResizeImage implements ShouldQueue
 {
@@ -30,16 +32,24 @@ class ResizeImage implements ShouldQueue
     }
 
     /**
-     * Execute the job. (Taglio automatico con Spatie Image!)
+     * Execute the job. (Taglio + Watermark come da PDF ufficiale!)
      */
     public function handle(): void
     {
         $srcPath = storage_path('app/public/' . $this->path . '/' . $this->fileName);
         $destPath = storage_path('app/public/' . $this->path . '/crop_' . $this->w . 'x' . $this->h . '_' . $this->fileName);
 
-        // Sintassi ufficiale Spatie Image v3 richiesta dai criteri Aulab
+        // Sintassi e percorso ufficiali speculari al 100% al tuo PDF!
         Image::load($srcPath)
-            ->crop($this->w, $this->h)
+            ->crop($this->w, $this->h, CropPosition::Center)
+            ->watermark(
+                base_path('resources/img/watermark.png'), 
+                width: 50,
+                height: 50,
+                paddingX: 10,
+                paddingY: 10,
+                paddingUnit: Unit::Percent
+            )
             ->save($destPath);
     }
 }

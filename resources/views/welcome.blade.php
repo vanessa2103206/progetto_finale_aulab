@@ -1,50 +1,40 @@
 <x-layout>
-    <!-- Contenitore per i messaggi di successo -->
-    @if (session()->has('successMessage'))
-        <div class="container mt-3">
-            <div class="alert alert-success text-center shadow-sm fw-bold" role="alert">
+    <!-- Hero Section dell'applicazione Presto.it -->
+    <div class="container-fluid text-center bg-dark text-white py-5 shadow-sm rounded mb-5">
+        <h1 class="display-3 fw-bold">Presto.it</h1>
+        <p class="lead text-muted">Il portale di annunci più veloce d'Italia</p>
+        @if (session()->has('successMessage'))
+            <div class="alert alert-success d-inline-block shadow-sm mt-3 px-5" role="alert">
                 {{ session('successMessage') }}
             </div>
-        </div>
-    @endif
-
-    <!-- Sezione di Benvenuto -->
-    <div class="container-fluid text-center bg-body-tertiary py-5 rounded shadow-sm mb-5">
-        <div class="row justify-content-center align-items-center">
-            <div class="col-12">
-                <h1 class="display-4 fw-bold">Presto.it</h1>
-                <p class="lead mb-4">{{ __('Il portale degli annunci d\'affari') }}</p>
-                <a href="{{ route('articles.create') }}" class="btn btn-primary btn-lg px-4 gap-3 fw-bold shadow-sm">
-                    {{ __('Inserisci Annuncio') }}
-                </a>
-            </div>
-        </div>
+        @endif
     </div>
 
-    <!-- Sezione Vetrina degli Ultimi Annunci -->
-    <div class="container">
-        <h2 class="text-center fw-bold mb-4">{{ __('Gli ultimi annunci inseriti') }}</h2>
+    <!-- Sezione degli ultimi annunci approvati -->
+    <div class="container my-5">
+        <h2 class="text-center fw-bold text-dark mb-4">Ultimi Annunci Inseriti</h2>
         <div class="row justify-content-center">
             @forelse($articles as $article)
                 <div class="col-12 col-md-4 mb-4">
                     <div class="card h-100 shadow-sm border-0 overflow-hidden">
                         
-                        @if(Str::contains(strtolower($article->title), 'maglia'))
-                            <img src="{{ asset('images/maglia.png') }}" class="card-img-top w-50 mx-auto pt-3" alt="Maglia nera" style="height: 180px; object-fit: contain;">
-                        @elseif(Str::contains(strtolower($article->title), 'portatile') || Str::contains(strtolower($article->title), 'pc'))
-                            <img src="{{ asset('images/portatile.png') }}" class="card-img-top w-50 mx-auto pt-3" alt="Computer Portatile" style="height: 180px; object-fit: contain;">
-                        @else
-                            <div class="bg-secondary text-white text-center py-5 fw-bold" style="height: 180px; line-height: 100px;">Nessuna Immagine</div>
-                        @endif
+                        <!-- CODICE AGGIORNATO E CORRETTO PER IMMAGINE REALE (USER STORY 3) -->
+                        <div class="text-center bg-light" style="height: 200px;">
+                            @if($article->images->count())
+                                <!-- Estrae la prima immagine reale caricata per l'articolo nello storage -->
+                                <img src="{{ Storage::url($article->images->first()->path) }}" class="card-img-top h-100 w-100" style="object-fit: cover;" alt="{{ $article->title }}">
+                            @else
+                                <!-- Fallback standard se l'articolo non ha immagini associate -->
+                                <div class="bg-secondary text-white text-center py-5 fw-bold h-100" style="line-height: 150px;">Nessuna Immagine</div>
+                            @endif
+                        </div>
                         
+                        <!-- Corpo dei dettagli della card dell'annuncio -->
                         <div class="card-body d-flex flex-column">
                             <h5 class="card-title fw-bold text-dark mb-1">{{ $article->title }}</h5>
                             <span class="badge bg-success align-self-start mb-3">{{ $article->category->name }}</span>
-                            
                             <p class="card-text text-muted text-truncate flex-grow-1">{{ $article->description }}</p>
-                            
                             <hr class="text-black-50">
-                            
                             <div class="d-flex justify-content-between align-items-center mt-auto">
                                 <span class="fs-4 fw-bold text-success">{{ number_format($article->price, 2, ',', '.') }} €</span>
                                 <a href="{{ route('articles.show', compact('article')) }}" class="btn btn-primary btn-sm shadow-sm fw-bold">Visualizza</a>
@@ -53,8 +43,9 @@
                     </div>
                 </div>
             @empty
+                <!-- Messaggio nel caso in cui non ci siano prodotti in elenco -->
                 <div class="col-12 text-center py-5">
-                    <p class="text-muted lead">Non ci sono ancora annunci pubblicati sul portale.</p>
+                    <p class="text-muted lead">Non ci sono ancora annunci disponibili in questa sezione.</p>
                 </div>
             @endforelse
         </div>

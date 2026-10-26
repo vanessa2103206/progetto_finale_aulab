@@ -2,13 +2,18 @@
 
 namespace App\Jobs;
 
+use App\Models\ArticleImage;
+use Google\Cloud\Vision\V1\Feature;
+use Google\Cloud\Vision\V1\Feature\Type;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\Models\ArticleImage; // Manteniamo il tuo modello delle immagini
+use Google\Cloud\Vision\V1\AnnotateImageRequest;
+use Google\Cloud\Vision\V1\BatchAnnotateImagesRequest;
 use Google\Cloud\Vision\V1\ImageAnnotatorClient;
+use Google\Cloud\Vision\V1\Image as VisionImage;
 use Spatie\Image\Image as SpatieImage;
 use Spatie\Image\Enums\Fit;
 
@@ -41,46 +46,60 @@ class RemoveFaces implements ShouldQueue
             return;
         }
 
+        $imageContents = file_get_contents($srcPath);
+
         putenv('GOOGLE_APPLICATION_CREDENTIALS=' . base_path('google_credential.json'));
 
-        $imageAnnotator = new ImageAnnotatorClient();
-        $imageContents = file_get_contents($srcPath);
+        $imageAnnotatorClient = new ImageAnnotatorClient();
         
-        $response = $imageAnnotator->faceDetection($imageContents);
-        $faces = $response->getFaceAnnotations();
+        $google_image = new VisionImage();
+        $google_image->setContent($imageContents);
 
-        if (count($faces) > 0) {
-            // Carichiamo l'immagine con Spatie Image come da riga 42 del PDF
-            $image = SpatieImage::load($srcPath);
+        $googleFeature = new Feature();
+        $googleFeature->setType(Type::FACE_DETECTION); // Rilevamento dei volti
 
-            foreach ($faces as $face) {
-                $vertices = $face->getBoundingPoly()->getVertices();
-                
-                $bounds = [];
-                foreach ($vertices as $vertex) {
-                    $bounds[] = [$vertex->getX(), $vertex->getY()];
+        $request = new AnnotateImageRequest();
+        $request->setImage($google_image);
+        $request->setFeatures([$googleFeature]);
+
+        $batchRequest = new BatchAnnotateImagesRequest();
+        $batchRequest->setRequests([$request]);
+
+        $responseBatch = $imageAnnotatorClient->batchAnnotateImages($batchRequest);
+        $responses = $responseBatch->getResponses();
+        
+        $imageAnnotatorClient->close();
+
+        if ($responses && isset($responses)) {
+            $faces = $responses->getFaceAnnotations();
+            
+            if ($faces && count($faces) > 0) {
+                $spatieImage = SpatieImage::load($srcPath);
+
+                foreach ($faces as $face) {
+                    $vertices = $face->getBoundingPoly()->getVertices();
+                    
+                    $bounds = [];
+                    foreach ($vertices as $vertex) {
+                        $bounds[] = [$vertex->getX(), $vertex->getY()];
+                    }
+
+                    $w = $bounds[2][0] - $bounds[0][0];
+                    $h = $bounds[2][1] - $bounds[0][1];
+
+                    // Applichiamo una filigrana coprente sopra il volto per la privacy
+                    $spatieImage->watermark(
+                        base_path('resources/img/watermark.png'),
+                        paddingX: $bounds[0][0],
+                        paddingY: $bounds[0][1],
+                        width: $w,
+                        height: $h,
+                        fit: Fit::Stretch
+                    );
                 }
 
-                // Calcolo esatto di larghezza e altezza del volto (Righe 35-37)
-                $w = $bounds[2][0] - $bounds[0][0];
-                $h = $bounds[2][1] - $bounds[0][1];
-
-                // Applichiamo la censura sopra il volto usando un'immagine o un watermark coprente di sistema
-                // Usiamo un file di placeholder temporaneo o una toppa nera
-                $image->watermark(
-                    base_path('public/favicon.ico'), // Usiamo la favicon del sito come toppa di censura della privacy!
-                    paddingX: $bounds[0][0],
-                    paddingY: $bounds[0][1],
-                    width: $w,
-                    height: $h,
-                    fit: Fit::Stretch
-                );
+                $spatieImage->save($srcPath);
             }
-
-            // Salviamo l'immagine sovrascrivendola (Riga 56)
-            $image->save($srcPath);
         }
-
-        $imageAnnotator->close();
     }
 }

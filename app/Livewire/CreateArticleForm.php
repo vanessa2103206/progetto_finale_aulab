@@ -10,19 +10,23 @@ use Illuminate\Support\Facades\Auth;
 use App\Jobs\ResizeImage;
 use App\Jobs\GoogleVisionSafeSearch;
 use App\Jobs\GoogleVisionLabelImage;
-use App\Jobs\RemoveFaces; // Importiamo il nuovo Job ufficiale della guida!
+use App\Jobs\RemoveFaces;
 
 class CreateArticleForm extends Component
 {
     use WithFileUploads;
 
+    // Proprietà del form
     public $title;
     public $description;
     public $price;
     public $category_id;
+
+    // Proprietà per la gestione delle immagini
     public $images = [];
     public $temporary_images = [];
 
+    // Regole di validazione
     protected $rules = [
         'title' => 'required|min:4',
         'description' => 'required|min:10',
@@ -31,6 +35,9 @@ class CreateArticleForm extends Component
         'temporary_images.*' => 'image|max:2048',
     ];
 
+    /**
+     * Ascolta in tempo reale il caricamento delle immagini in blocco
+     */
     public function updatedTemporaryImages()
     {
         if ($this->validate(['temporary_images.*' => 'image|max:2048'])) {
@@ -40,6 +47,9 @@ class CreateArticleForm extends Component
         }
     }
 
+    /**
+     * Rimuove una singola immagine dall'anteprima prima del salvataggio
+     */
     public function removeImage($key)
     {
         if (array_key_exists($key, $this->images)) {
@@ -48,10 +58,14 @@ class CreateArticleForm extends Component
         $this->images = array_values($this->images);
     }
 
+    /**
+     * Salva l'articolo e attiva la catena di Job asincroni in background
+     */
     public function store()
     {
         $this->validate();
 
+        // 1. Creiamo l'articolo in sospeso
         $article = Article::create([
             'title' => $this->title,
             'description' => $this->description,
@@ -61,13 +75,14 @@ class CreateArticleForm extends Component
             'is_accepted' => null, 
         ]);
 
+        // 2. Se ci sono immagini caricate, le salviamo e lanciamo i Job in background
         if (count($this->images)) {
             foreach ($this->images as $image) {
                 $path = $image->store('articles', 'public');
                 $newImage = $article->images()->create(['path' => $path]);
 
-                // METODO WITHCHAIN() ESATTO DELLA GUIDA UFFICIALE DI AULAB!
-                // Mette in coda sequenziale ordinata tutti i lavori delle immagini
+                // LA CATENA ASINCRONA COMPLETA ORDINATA (WITHCHAIN)
+                // Applica prima il ridimensionamento di Spatie, poi i controlli di Google Vision ed infine l'oscuramento volti
                 ResizeImage::dispatch($newImage->path, 300, 300)
                     ->withChain([
                         new GoogleVisionSafeSearch($newImage->id),
@@ -78,9 +93,13 @@ class CreateArticleForm extends Component
         }
 
         session()->flash('successMessage', 'Annuncio inserito con successo! Verrà pubblicato dopo la revisione.');
+        
         $this->cleanForm();
     }
 
+    /**
+     * Svuota i campi del modulo dopo il salvataggio
+     */
     public function cleanForm()
     {
         $this->title = '';

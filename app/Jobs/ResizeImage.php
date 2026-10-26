@@ -32,13 +32,11 @@ class ResizeImage implements ShouldQueue
     }
 
     /**
-     * Execute the job.
+     * Execute the job. (Taglio + Watermark come da PDF ufficiale!)
      */
     public function handle(): void
     {
         $srcPath = storage_path('app/public/' . $this->path . '/' . $this->fileName);
-        
-        // CORREZIONE SINTASSI: Forziamo il salvataggio con il prefisso esatto crop_300x300_ richiesto!
         $destPath = storage_path('app/public/' . $this->path . '/crop_' . $this->w . 'x' . $this->h . '_' . $this->fileName);
 
         if (file_exists($srcPath)) {

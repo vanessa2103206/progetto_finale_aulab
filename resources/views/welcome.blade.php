@@ -18,13 +18,19 @@
                 <div class="col-12 col-md-4 mb-4">
                     <div class="card h-100 shadow-sm border-0 overflow-hidden">
                         
-                        <!-- CODICE AGGIORNATO E CORRETTO PER IMMAGINE REALE (USER STORY 3) -->
+                        <!-- SEZIONE IMMAGINE RITAGLIATA CON SPATIE (USER STORY 6) -->
                         <div class="text-center bg-light" style="height: 200px;">
                             @if($article->images->count())
-                                <!-- Estrae la prima immagine reale caricata per l'articolo nello storage -->
-                                <img src="{{ Storage::url($article->images->first()->path) }}" class="card-img-top h-100 w-100" style="object-fit: cover;" alt="{{ $article->title }}">
+                                @php
+                                    $image = $article->images->first();
+                                    $cropPath = dirname($image->path) . '/crop_300x300_' . basename($image->path);
+                                @endphp
+                                @if(file_exists(storage_path('app/public/' . $cropPath)))
+                                    <img src="{{ Storage::url($cropPath) }}" class="card-img-top h-100 w-100" style="object-fit: cover;" alt="{{ $article->title }}">
+                                @else
+                                    <img src="{{ Storage::url($image->path) }}" class="card-img-top h-100 w-100" style="object-fit: cover;" alt="{{ $article->title }}">
+                                @endif
                             @else
-                                <!-- Fallback standard se l'articolo non ha immagini associate -->
                                 <div class="bg-secondary text-white text-center py-5 fw-bold h-100" style="line-height: 150px;">Nessuna Immagine</div>
                             @endif
                         </div>
@@ -43,7 +49,6 @@
                     </div>
                 </div>
             @empty
-                <!-- Messaggio nel caso in cui non ci siano prodotti in elenco -->
                 <div class="col-12 text-center py-5">
                     <p class="text-muted lead">Non ci sono ancora annunci disponibili in questa sezione.</p>
                 </div>

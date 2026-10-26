@@ -5,7 +5,6 @@
     </div>
 
     <div class="container">
-        <!-- Messaggio di notifica -->
         @if (session()->has('successMessage'))
             <div class="alert alert-success text-center shadow-sm" role="alert">
                 {{ session('successMessage') }}
@@ -16,24 +15,24 @@
             <div class="card shadow border-0 p-5 bg-white mb-5 rounded">
                 <div class="row align-items-center">
                     
-                    <!-- SEZIONE IMMAGINE E SEMAFORI GOOGLE VISION (USER STORY 7) -->
                     <div class="col-12 col-md-5 text-center mb-4 mb-md-0">
                         @if($article_to_check->images->count())
                             <div class="row">
                                 @foreach($article_to_check->images as $image)
                                     <div class="col-12 mb-3">
-                                        <!-- Visualizzazione foto con il ritaglio crop_300x300 o fallback originale -->
-                                        @if(file_exists(storage_path('app/public/' . dirname($image->path) . '/crop_300x300_' . basename($image->path))))
-                                            <img src="{{ Storage::url(dirname($image->path) . '/crop_300x300_' . basename($image->path)) }}" class="img-fluid rounded shadow-sm mb-2" alt="Immagine annuncio" style="max-height: 300px; width: 300px; object-fit: cover;">
+                                        <!-- UTILIZZO DIRETTO DEL CROP DI SPATIE (USER STORY 6) -->
+                                        @php
+                                            $cropPath = dirname($image->path) . '/crop_300x300_' . basename($image->path);
+                                        @endphp
+                                        @if(file_exists(storage_path('app/public/' . $cropPath)))
+                                            <img src="{{ Storage::url($cropPath) }}" class="img-fluid rounded shadow-sm mb-2" alt="Immagine annuncio" style="max-height: 300px; width: 300px; object-fit: cover;">
                                         @else
                                             <img src="{{ Storage::url($image->path) }}" class="img-fluid rounded shadow-sm mb-2" alt="Immagine annuncio" style="max-height: 300px; width: 300px; object-fit: cover;">
                                         @endif
 
-                                        <!-- GRAFICA CON SEMAFORI REALI STRUTTURATA SECONDO IL PDF DI AULAB -->
+                                        <!-- GRAFICA CON CONTR0LLI GOOGLE VISION -->
                                         <div class="mt-3 text-start card p-3 bg-light border-0">
                                             <h6 class="fw-bold text-dark border-bottom pb-1 mb-2">🤖 Revisione Google Vision</h6>
-                                            
-                                            <!-- Griglia indicatori SafeSearch mappati con le icone bi bi-circle-fill -->
                                             <div class="row small mb-2 row-gap-1">
                                                 <div class="col-6">Adulti: <i class="{{ $image->adult ?? 'text-secondary bi bi-circle-fill' }}"></i></div>
                                                 <div class="col-6">Satira: <i class="{{ $image->spoof ?? 'text-secondary bi bi-circle-fill' }}"></i></div>
@@ -41,7 +40,6 @@
                                                 <div class="col-6">Violenza: <i class="{{ $image->violence ?? 'text-secondary bi bi-circle-fill' }}"></i></div>
                                                 <div class="col-6">Racy (Nudo): <i class="{{ $image->racy ?? 'text-secondary bi bi-circle-fill' }}"></i></div>
                                             </div>
-
                                             <h6 class="fw-bold text-secondary mb-1 mt-2" style="font-size: 0.85rem;">🏷️ Tag rilevati dall'IA:</h6>
                                             @if($image->labels)
                                                 <div class="d-flex flex-wrap gap-1">
@@ -61,7 +59,6 @@
                         @endif
                     </div>
 
-                    <!-- Dettagli dell'annuncio -->
                     <div class="col-12 col-md-7">
                         <span class="badge bg-success mb-2 px-3 py-2 fs-6">{{ $article_to_check->category->name }}</span>
                         <h2 class="fw-bold text-dark mb-2">{{ $article_to_check->title }}</h2>
@@ -72,7 +69,6 @@
                             <p class="text-dark bg-light p-3 rounded" style="white-space: pre-line;">{{ $article_to_check->description }}</p>
                         </div>
 
-                        <!-- Bottoni di gestione -->
                         <div class="d-flex gap-3 mt-4">
                             <form action="{{ route('revisore.reject_article', ['article' => $article_to_check->id]) }}" method="POST" class="flex-grow-1">
                                 @csrf
@@ -90,7 +86,6 @@
                 </div>
             </div>
         @else
-            <!-- Plancia vuota -->
             <div class="row justify-content-center">
                 <div class="col-12 col-md-8 text-center py-5">
                     <div class="alert alert-info shadow border-0 p-5 rounded" role="alert">

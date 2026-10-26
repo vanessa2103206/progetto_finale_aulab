@@ -32,24 +32,27 @@ class ResizeImage implements ShouldQueue
     }
 
     /**
-     * Execute the job. (Taglio + Watermark come da PDF ufficiale!)
+     * Execute the job.
      */
     public function handle(): void
     {
         $srcPath = storage_path('app/public/' . $this->path . '/' . $this->fileName);
+        
+        // CORREZIONE SINTASSI: Forziamo il salvataggio con il prefisso esatto crop_300x300_ richiesto!
         $destPath = storage_path('app/public/' . $this->path . '/crop_' . $this->w . 'x' . $this->h . '_' . $this->fileName);
 
-        // Sintassi e percorso ufficiali speculari al 100% al tuo PDF!
-        Image::load($srcPath)
-            ->crop($this->w, $this->h, CropPosition::Center)
-            ->watermark(
-                base_path('resources/img/watermark.png'), 
-                width: 50,
-                height: 50,
-                paddingX: 10,
-                paddingY: 10,
-                paddingUnit: Unit::Percent
-            )
-            ->save($destPath);
+        if (file_exists($srcPath)) {
+            Image::load($srcPath)
+                ->crop($this->w, $this->h, CropPosition::Center)
+                ->watermark(
+                    base_path('resources/img/watermark.png'), 
+                    width: 50,
+                    height: 50,
+                    paddingX: 10,
+                    paddingY: 10,
+                    paddingUnit: Unit::Percent
+                )
+                ->save($destPath);
+        }
     }
 }

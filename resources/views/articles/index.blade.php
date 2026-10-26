@@ -10,13 +10,20 @@
                 <div class="col-12 col-md-4 mb-4">
                     <div class="card h-100 shadow-sm border-0 overflow-hidden">
                         
-                        <!-- CODICE AGGIORNATO PER IMMAGINE REALE (USER STORY 5 & 6) -->
+                        <!-- SEZIONE IMMAGINE RITAGLIATA CON SPATIE (USER STORY 6) -->
                         <div class="text-center bg-light" style="height: 200px;">
                             @if($article->images->count())
-                                <!-- Prende la prima immagine caricata per l'articolo -->
-                                <img src="{{ Storage::url($article->images->first()->path) }}" class="card-img-top h-100 w-100" style="object-fit: cover;">
+                                @php
+                                    $image = $article->images->first();
+                                    $cropPath = dirname($image->path) . '/crop_300x300_' . basename($image->path);
+                                @endphp
+                                @if(file_exists(storage_path('app/public/' . $cropPath)))
+                                    <img src="{{ Storage::url($cropPath) }}" class="card-img-top h-100 w-100" style="object-fit: cover;" alt="{{ $article->title }}">
+                                @else
+                                    <img src="{{ Storage::url($image->path) }}" class="card-img-top h-100 w-100" style="object-fit: cover;" alt="{{ $article->title }}">
+                                @endif
                             @else
-                                <div class="bg-secondary text-white text-center py-5 fw-bold h-100" style="line-height: 100px;">Nessuna Immagine</div>
+                                <div class="bg-secondary text-white text-center py-5 fw-bold h-100" style="line-height: 150px;">Nessuna Immagine</div>
                             @endif
                         </div>
                         

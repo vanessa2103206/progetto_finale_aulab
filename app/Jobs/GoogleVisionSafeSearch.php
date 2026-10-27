@@ -12,7 +12,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Google\Cloud\Vision\V1\AnnotateImageRequest;
 use Google\Cloud\Vision\V1\BatchAnnotateImagesRequest;
-use Google\Cloud\Vision\V1\ImageAnnotatorClient;
+use Google\Cloud\Vision\V1\ImageAnnotatorClient; // Importazione esatta richiesta dal prof!
 use Google\Cloud\Vision\V1\Image as VisionImage;
 
 class GoogleVisionSafeSearch implements ShouldQueue
@@ -21,11 +21,17 @@ class GoogleVisionSafeSearch implements ShouldQueue
 
     private $article_image_id;
 
+    /**
+     * Create a new job instance.
+     */
     public function __construct($article_image_id)
     {
         $this->article_image_id = $article_image_id;
     }
 
+    /**
+     * Execute the job.
+     */
     public function handle(): void
     {
         $i = ArticleImage::find($this->article_image_id);
@@ -62,7 +68,6 @@ class GoogleVisionSafeSearch implements ShouldQueue
         $imageAnnotatorClient->close();
 
         if ($responses && isset($responses[0])) {
-            // Estrazione con indice zero come richiesto a pagina 112 del PDF
             $safe = $responses[0]->getSafeSearchAnnotation();
             
             if ($safe) {

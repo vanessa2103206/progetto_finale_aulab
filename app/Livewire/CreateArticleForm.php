@@ -9,7 +9,7 @@ use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
 use App\Jobs\ResizeImage;
 use App\Jobs\GoogleVisionSafeSearch;
-use App\Jobs\GoogleVisionLabelImage;
+use App\Jobs\GoogleVisionLabelImage; // IMPORTAZIONE UFFICIALE RICHIESTA A PAGINA 119!
 use App\Jobs\RemoveFaces;
 
 class CreateArticleForm extends Component
@@ -59,13 +59,13 @@ class CreateArticleForm extends Component
     }
 
     /**
-     * Salva l'articolo e attiva la catena di Job asincroni in background
+     * Salva l'articolo e lancia i singoli dispatch sequenziali (Pagina 119 PDF)
      */
     public function store()
     {
         $this->validate();
 
-        // 1. Creiamo l'articolo in sospeso
+        // 1. Creiamo l'articolo nel database
         $article = Article::create([
             'title' => $this->title,
             'description' => $this->description,
@@ -75,20 +75,17 @@ class CreateArticleForm extends Component
             'is_accepted' => null, 
         ]);
 
-        // 2. Se ci sono immagini caricate, le salviamo e lanciamo i Job in background
+        // 2. Se ci sono immagini caricate, le salviamo ed eseguiamo i dispatch singoli richiesti dal prof
         if (count($this->images)) {
             foreach ($this->images as $image) {
                 $path = $image->store('articles', 'public');
                 $newImage = $article->images()->create(['path' => $path]);
 
-                // LA CATENA ASINCRONA COMPLETA ORDINATA (WITHCHAIN)
-                // Applica prima il ridimensionamento di Spatie, poi i controlli di Google Vision ed infine l'oscuramento volti
-                ResizeImage::dispatch($newImage->path, 300, 300)
-                    ->withChain([
-                        new GoogleVisionSafeSearch($newImage->id),
-                        new GoogleVisionLabelImage($newImage->id),
-                        new RemoveFaces($newImage->id)
-                    ]);
+                // STRUTTURA SEQUENZIALE SEPARATA CON DISPATCH SINGOLI COME DA DOCUMENTAZIONE AULAB
+                dispatch(new ResizeImage($newImage->path, 300, 300));
+                dispatch(new GoogleVisionSafeSearch($newImage->id));
+                dispatch(new GoogleVisionLabelImage($newImage->id));
+                dispatch(new RemoveFaces($newImage->id)); 
             }
         }
 

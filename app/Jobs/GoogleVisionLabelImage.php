@@ -21,17 +21,11 @@ class GoogleVisionLabelImage implements ShouldQueue
 
     private $article_image_id;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct($article_image_id)
     {
         $this->article_image_id = $article_image_id;
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
         $i = ArticleImage::find($this->article_image_id);
@@ -44,20 +38,16 @@ class GoogleVisionLabelImage implements ShouldQueue
             return;
         }
 
-        // Recuperiamo il contenuto binario dell'immagine (Pagina 116)
         $image = file_get_contents($srcPath);
-
-        // Impostiamo la credenziale protetta nel file json
         putenv('GOOGLE_APPLICATION_CREDENTIALS=' . base_path('google_credential.json'));
 
-        // CONFIGURAZIONE BATCH PER LE ETICHETTE RICHIESTA DAL PROFESSORE
         $imageAnnotatorClient = new ImageAnnotatorClient();
         
         $google_image = new VisionImage();
         $google_image->setContent($image);
 
         $googleFeature = new Feature();
-        $googleFeature->setType(Type::LABEL_DETECTION); // Tipo specifico per estrazione tag (Riga 49)
+        $googleFeature->setType(Type::LABEL_DETECTION);
 
         $request = new AnnotateImageRequest();
         $request->setImage($google_image);
@@ -66,17 +56,14 @@ class GoogleVisionLabelImage implements ShouldQueue
         $batchRequest = new BatchAnnotateImagesRequest();
         $batchRequest->setRequests([$request]);
 
-        // Chiamata formale all'IA di Google
         $responseBatch = $imageAnnotatorClient->batchAnnotateImages($batchRequest);
         $responses = $responseBatch->getResponses();
         
         $imageAnnotatorClient->close();
 
-        // SALVATAGGIO DEI TAG ESTRATTI NEL DATABASE (PAGINE 116-117)
-        if ($responses && isset($responses)) {
-            // Prendiamo la prima risposta dall'array dei risultati batch
-            $firstResponse = $responses[0];
-            $labels = $firstResponse->getLabelAnnotations(); // Riga 61 del PDF
+        if ($responses && isset($responses[0])) {
+            // Estrazione con indice zero come richiesto a pagina 116 del PDF
+            $labels = $responses[0]->getLabelAnnotations();
             
             if ($labels) {
                 $result = [];
@@ -84,7 +71,7 @@ class GoogleVisionLabelImage implements ShouldQueue
                     $result[] = $label->getDescription();
                 }
                 
-                $i->labels = $result; // Salviamo l'array nella colonna (Riga 69 del PDF)
+                $i->labels = $result;
                 $i->save();
             }
         }

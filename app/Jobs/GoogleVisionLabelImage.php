@@ -12,7 +12,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Google\Cloud\Vision\V1\AnnotateImageRequest;
 use Google\Cloud\Vision\V1\BatchAnnotateImagesRequest;
-use Google\Cloud\Vision\ImageAnnotatorClient; // <-- IMPORT UFFICIALE CORRETTO SENZA V1!
+use Google\Cloud\Vision\V1\Client\ImageAnnotatorClient;
 use Google\Cloud\Vision\V1\Image as VisionImage;
 
 class GoogleVisionLabelImage implements ShouldQueue
@@ -41,8 +41,7 @@ class GoogleVisionLabelImage implements ShouldQueue
         $image = file_get_contents($srcPath);
         putenv('GOOGLE_APPLICATION_CREDENTIALS=' . base_path('google_credential.json'));
 
-        $imageAnnotatorClient = new ImageAnnotatorClient();
-        
+        $googleVisionClient = new ImageAnnotatorClient();
         $google_image = new VisionImage();
         $google_image->setContent($image);
 
@@ -56,13 +55,13 @@ class GoogleVisionLabelImage implements ShouldQueue
         $batchRequest = new BatchAnnotateImagesRequest();
         $batchRequest->setRequests([$request]);
 
-        $responseBatch = $imageAnnotatorClient->batchAnnotateImages($batchRequest);
+        $responseBatch = $googleVisionClient->batchAnnotateImages($batchRequest);
         $responses = $responseBatch->getResponses();
-        
-        $imageAnnotatorClient->close();
+        $googleVisionClient->close();
 
         if ($responses && isset($responses[0])) {
-            $labels = $responses[0]->getLabelAnnotations();
+            $response = $responses[0];
+            $labels = $response->getLabelAnnotations();
             
             if ($labels) {
                 $result = [];

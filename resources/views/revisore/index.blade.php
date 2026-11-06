@@ -20,7 +20,6 @@
                             <div class="row">
                                 @foreach($article_to_check->images as $image)
                                     <div class="col-12 mb-3">
-                                        <!-- UTILIZZO DIRETTO DEL CROP DI SPATIE (USER STORY 6) -->
                                         @php
                                             $cropPath = dirname($image->path) . '/crop_300x300_' . basename($image->path);
                                         @endphp
@@ -30,7 +29,7 @@
                                             <img src="{{ Storage::url($image->path) }}" class="img-fluid rounded shadow-sm mb-2" alt="Immagine annuncio" style="max-height: 300px; width: 300px; object-fit: cover;">
                                         @endif
 
-                                        <!-- GRAFICA CON CONTR0LLI GOOGLE VISION -->
+                                        <!-- GRAFICA REVISORE INDEX COPIATA DAI TUOI SCREENSHOT (PAGINA 114 e 120) -->
                                         <div class="mt-3 text-start card p-3 bg-light border-0">
                                             <h6 class="fw-bold text-dark border-bottom pb-1 mb-2">🤖 Revisione Google Vision</h6>
                                             <div class="row small mb-2 row-gap-1">
@@ -40,6 +39,7 @@
                                                 <div class="col-6">Violenza: <i class="{{ $image->violence ?? 'text-secondary bi bi-circle-fill' }}"></i></div>
                                                 <div class="col-6">Racy (Nudo): <i class="{{ $image->racy ?? 'text-secondary bi bi-circle-fill' }}"></i></div>
                                             </div>
+                                            
                                             <h6 class="fw-bold text-secondary mb-1 mt-2" style="font-size: 0.85rem;">🏷️ Tag rilevati dall'IA:</h6>
                                             @if($image->labels)
                                                 <div class="d-flex flex-wrap gap-1">
@@ -48,7 +48,7 @@
                                                     @endforeach
                                                 </div>
                                             @else
-                                                <p class="text-muted small italic mb-0">In attesa dell'analisi o nessuna chiave inserita...</p>
+                                                <p class="text-muted small italic mb-0">In attesa dell'analisi o nessuna etichetta presente...</p>
                                             @endif
                                         </div>
                                     </div>

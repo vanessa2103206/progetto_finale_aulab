@@ -12,7 +12,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Google\Cloud\Vision\V1\AnnotateImageRequest;
 use Google\Cloud\Vision\V1\BatchAnnotateImagesRequest;
-use Google\Cloud\Vision\ImageAnnotatorClient; // <-- IMPORT UFFICIALE CORRETTO SENZA V1!
+use Google\Cloud\Vision\V1\Client\ImageAnnotatorClient;
 use Google\Cloud\Vision\V1\Image as VisionImage;
 
 class GoogleVisionSafeSearch implements ShouldQueue
@@ -21,11 +21,17 @@ class GoogleVisionSafeSearch implements ShouldQueue
 
     private $article_image_id;
 
+    /**
+     * Create a new job instance.
+     */
     public function __construct($article_image_id)
     {
         $this->article_image_id = $article_image_id;
     }
 
+    /**
+     * Execute the job.
+     */
     public function handle(): void
     {
         $i = ArticleImage::find($this->article_image_id);
@@ -41,8 +47,7 @@ class GoogleVisionSafeSearch implements ShouldQueue
         $image = file_get_contents($srcPath);
         putenv('GOOGLE_APPLICATION_CREDENTIALS=' . base_path('google_credential.json'));
 
-        $imageAnnotatorClient = new ImageAnnotatorClient();
-        
+        $googleVisionClient = new ImageAnnotatorClient();
         $google_image = new VisionImage();
         $google_image->setContent($image);
 
@@ -56,35 +61,41 @@ class GoogleVisionSafeSearch implements ShouldQueue
         $batchRequest = new BatchAnnotateImagesRequest();
         $batchRequest->setRequests([$request]);
 
-        $responseBatch = $imageAnnotatorClient->batchAnnotateImages($batchRequest);
+        $responseBatch = $googleVisionClient->batchAnnotateImages($batchRequest);
         $responses = $responseBatch->getResponses();
-        
-        $imageAnnotatorClient->close();
+        $googleVisionClient->close();
 
         if ($responses && isset($responses[0])) {
-            $safe = $responses[0]->getSafeSearchAnnotation();
+            $response = $responses[0];
+            $safeSearchAnnotation = $response->getSafeSearchAnnotation();
             
-            if ($safe) {
+            if ($safeSearchAnnotation) {
+                $adult = $safeSearchAnnotation->getAdult();
+                $spoof = $safeSearchAnnotation->getSpoof();
+                $medical = $safeSearchAnnotation->getMedical();
+                $violence = $safeSearchAnnotation->getViolence();
+                $racy = $safeSearchAnnotation->getRacy();
+
                 $likelihoodName = [
-                    'UNKNOWN' => 'text-secondary bi bi-circle-fill',
-                    'VERY_UNLIKELY' => 'text-success bi bi-circle-fill',
-                    'UNLIKELY' => 'text-success bi bi-circle-fill',
-                    'POSSIBLE' => 'text-warning bi bi-circle-fill',
-                    'LIKELY' => 'text-danger bi bi-circle-fill',
-                    'VERY_LIKELY' => 'text-danger bi bi-circle-fill',
+                    'text-secondary bi bi-circle-fill',
+                    'text-success bi bi-circle-fill',
+                    'text-success bi bi-circle-fill',
+                    'text-warning bi bi-circle-fill',
+                    'text-warning bi bi-circle-fill',
+                    'text-danger bi bi-circle-fill',
                     0 => 'text-secondary bi bi-circle-fill',
                     1 => 'text-success bi bi-circle-fill',
                     2 => 'text-success bi bi-circle-fill',
                     3 => 'text-warning bi bi-circle-fill',
-                    4 => 'text-danger bi bi-circle-fill',
+                    4 => 'text-warning bi bi-circle-fill',
                     5 => 'text-danger bi bi-circle-fill'
                 ];
 
-                $i->adult = $likelihoodName[$safe->getAdult()];
-                $i->spoof = $likelihoodName[$safe->getSpoof()];
-                $i->medical = $likelihoodName[$safe->getMedical()];
-                $i->violence = $likelihoodName[$safe->getViolence()];
-                $i->racy = $likelihoodName[$safe->getRacy()];
+                $i->adult = $likelihoodName[$adult];
+                $i->spoof = $likelihoodName[$spoof];
+                $i->medical = $likelihoodName[$medical];
+                $i->violence = $likelihoodName[$violence];
+                $i->racy = $likelihoodName[$racy];
                 $i->save();
             }
         }

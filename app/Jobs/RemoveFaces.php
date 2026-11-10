@@ -12,7 +12,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Google\Cloud\Vision\V1\AnnotateImageRequest;
 use Google\Cloud\Vision\V1\BatchAnnotateImagesRequest;
-use Google\Cloud\Vision\V1\ImageAnnotatorClient;
+use Google\Cloud\Vision\V1\Client\ImageAnnotatorClient; // Import formale richiesto!
 use Google\Cloud\Vision\V1\Image as VisionImage;
 use Spatie\Image\Image as SpatieImage;
 use Spatie\Image\Enums\Fit;
@@ -47,7 +47,6 @@ class RemoveFaces implements ShouldQueue
         }
 
         $imageContents = file_get_contents($srcPath);
-
         putenv('GOOGLE_APPLICATION_CREDENTIALS=' . base_path('google_credential.json'));
 
         $imageAnnotatorClient = new ImageAnnotatorClient();
@@ -56,7 +55,7 @@ class RemoveFaces implements ShouldQueue
         $google_image->setContent($imageContents);
 
         $googleFeature = new Feature();
-        $googleFeature->setType(Type::FACE_DETECTION); // Rilevamento dei volti
+        $googleFeature->setType(Type::FACE_DETECTION);
 
         $request = new AnnotateImageRequest();
         $request->setImage($google_image);
@@ -67,11 +66,11 @@ class RemoveFaces implements ShouldQueue
 
         $responseBatch = $imageAnnotatorClient->batchAnnotateImages($batchRequest);
         $responses = $responseBatch->getResponses();
-        
         $imageAnnotatorClient->close();
 
         if ($responses && isset($responses)) {
-            $faces = $responses->getFaceAnnotations();
+            $response = $responses;
+            $faces = $response->getFaceAnnotations();
             
             if ($faces && count($faces) > 0) {
                 $spatieImage = SpatieImage::load($srcPath);
@@ -87,7 +86,6 @@ class RemoveFaces implements ShouldQueue
                     $w = $bounds[2][0] - $bounds[0][0];
                     $h = $bounds[2][1] - $bounds[0][1];
 
-                    // Applichiamo una filigrana coprente sopra il volto per la privacy
                     $spatieImage->watermark(
                         base_path('resources/img/watermark.png'),
                         paddingX: $bounds[0][0],

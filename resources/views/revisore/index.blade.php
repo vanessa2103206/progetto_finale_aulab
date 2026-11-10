@@ -29,7 +29,7 @@
                                             <img src="{{ Storage::url($image->path) }}" class="img-fluid rounded shadow-sm mb-2" alt="Immagine annuncio" style="max-height: 300px; width: 300px; object-fit: cover;">
                                         @endif
 
-                                        <!-- GRAFICA REVISORE INDEX COPIATA DAI TUOI SCREENSHOT (PAGINA 114 e 120) -->
+                                        <!-- SEZIONE REVISIONE GOOGLE VISION ALLINEATA AL DATABASE -->
                                         <div class="mt-3 text-start card p-3 bg-light border-0">
                                             <h6 class="fw-bold text-dark border-bottom pb-1 mb-2">🤖 Revisione Google Vision</h6>
                                             <div class="row small mb-2 row-gap-1">

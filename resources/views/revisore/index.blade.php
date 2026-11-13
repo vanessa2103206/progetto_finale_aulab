@@ -29,27 +29,15 @@
                                             <img src="{{ Storage::url($image->path) }}" class="img-fluid rounded shadow-sm mb-2" alt="Immagine annuncio" style="max-height: 300px; width: 300px; object-fit: cover;">
                                         @endif
 
-                                        <!-- SEZIONE REVISIONE GOOGLE VISION ALLINEATA AL DATABASE -->
                                         <div class="mt-3 text-start card p-3 bg-light border-0">
-                                            <h6 class="fw-bold text-dark border-bottom pb-1 mb-2">🤖 Revisione Google Vision</h6>
+                                            <h6 class="fw-bold text-dark border-bottom pb-1 mb-2">Revisione Google Vision</h6>
                                             <div class="row small mb-2 row-gap-1">
-                                                <div class="col-6">Adulti: <i class="{{ $image->adult ?? 'text-secondary bi bi-circle-fill' }}"></i></div>
-                                                <div class="col-6">Satira: <i class="{{ $image->spoof ?? 'text-secondary bi bi-circle-fill' }}"></i></div>
-                                                <div class="col-6">Medicina: <i class="{{ $image->medical ?? 'text-secondary bi bi-circle-fill' }}"></i></div>
-                                                <div class="col-6">Violenza: <i class="{{ $image->violence ?? 'text-secondary bi bi-circle-fill' }}"></i></div>
-                                                <div class="col-6">Racy (Nudo): <i class="{{ $image->racy ?? 'text-secondary bi bi-circle-fill' }}"></i></div>
+                                                <div class="col-6">Adulti: <i class="{{ $image->adult }}"></i></div>
+                                                <div class="col-6">Satira: <i class="{{ $image->spoof }}"></i></div>
+                                                <div class="col-6">Medicina: <i class="{{ $image->medical }}"></i></div>
+                                                <div class="col-6">Violenza: <i class="{{ $image->violence }}"></i></div>
+                                                <div class="col-6">Racy (Nudo): <i class="{{ $image->racy }}"></i></div>
                                             </div>
-                                            
-                                            <h6 class="fw-bold text-secondary mb-1 mt-2" style="font-size: 0.85rem;">🏷️ Tag rilevati dall'IA:</h6>
-                                            @if($image->labels)
-                                                <div class="d-flex flex-wrap gap-1">
-                                                    @foreach($image->labels as $label)
-                                                        <span class="badge bg-info text-dark" style="font-size: 0.75rem;">#{{ $label }}</span>
-                                                    @endforeach
-                                                </div>
-                                            @else
-                                                <p class="text-muted small italic mb-0">In attesa dell'analisi o nessuna etichetta presente...</p>
-                                            @endif
                                         </div>
                                     </div>
                                 @endforeach
@@ -73,13 +61,13 @@
                             <form action="{{ route('revisore.reject_article', ['article' => $article_to_check->id]) }}" method="POST" class="flex-grow-1">
                                 @csrf
                                 @method('PATCH')
-                                <button type="submit" class="btn btn-danger w-100 py-3 fw-bold shadow-sm">❌ Rifiuta Annuncio</button>
+                                <button type="submit" class="btn btn-danger w-100 py-3 fw-bold shadow-sm">Rifiuta Annuncio</button>
                             </form>
 
                             <form action="{{ route('revisore.accept_article', ['article' => $article_to_check->id]) }}" method="POST" class="flex-grow-1">
                                 @csrf
                                 @method('PATCH')
-                                <button type="submit" class="btn btn-success w-100 py-3 fw-bold shadow-sm">✅ Accetta Annuncio</button>
+                                <button type="submit" class="btn btn-success w-100 py-3 fw-bold shadow-sm">Accetta Annuncio</button>
                             </form>
                         </div>
                     </div>

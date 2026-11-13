@@ -9,8 +9,6 @@ use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Auth;
 use App\Jobs\ResizeImage;
 use App\Jobs\GoogleVisionSafeSearch;
-use App\Jobs\GoogleVisionLabelImage;
-use App\Jobs\RemoveFaces;
 
 class CreateArticleForm extends Component
 {
@@ -68,8 +66,6 @@ class CreateArticleForm extends Component
 
                 dispatch(new ResizeImage($newImage->path, 300, 300));
                 dispatch(new GoogleVisionSafeSearch($newImage->id));
-                dispatch(new GoogleVisionLabelImage($newImage->id));
-                dispatch(new RemoveFaces($newImage->id)); 
             }
         }
 

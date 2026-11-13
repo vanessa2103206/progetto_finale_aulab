@@ -38,6 +38,17 @@
                                                 <div class="col-6">Violenza: <i class="{{ $image->violence }}"></i></div>
                                                 <div class="col-6">Racy (Nudo): <i class="{{ $image->racy }}"></i></div>
                                             </div>
+                                            <h6 class="fw-bold text-secondary mb-1 mt-2" style="font-size: 0.85rem;">Tag rilevati dall'IA:</h6>
+@if($image->labels)
+    <div class="d-flex flex-wrap gap-1">
+        @foreach($image->labels as $label)
+            <span class="badge bg-info text-dark" style="font-size: 0.75rem;">#{{ $label }}</span>
+        @endforeach
+    </div>
+@else
+    <p class="text-muted small italic mb-0">Nessuna etichetta presente...</p>
+@endif
+
                                         </div>
                                     </div>
                                 @endforeach

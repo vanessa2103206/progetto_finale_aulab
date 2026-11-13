@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Livewire;
+use App\Jobs\GoogleVisionLabelImage;
 
 use Livewire\Component;
 use App\Models\Article;
@@ -65,7 +66,9 @@ class CreateArticleForm extends Component
                 $newImage = $article->images()->create(['path' => $path]);
 
                 dispatch(new ResizeImage($newImage->path, 300, 300));
-                dispatch(new GoogleVisionSafeSearch($newImage->id));
+dispatch(new GoogleVisionSafeSearch($newImage->id));
+dispatch(new GoogleVisionLabelImage($newImage->id));
+
             }
         }
 
